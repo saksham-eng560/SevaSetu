@@ -4,11 +4,13 @@ from contextlib import asynccontextmanager
 from routes.services import router
 from routes.areas import arearouter
 from app.exceptions import InvalidPincodeError, PincodeNotServiceableError, ServiceUnavailableError
-
+from app.database import create_table, get_session
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up...")
+    create_table()
+    print("Database tables created.")
     yield
     print("Shutting down...")
 
