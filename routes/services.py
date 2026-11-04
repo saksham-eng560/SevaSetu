@@ -1,0 +1,139 @@
+#10 different services we provide
+services_we_provide = [
+    {
+        "id": 1,
+        "name": "Tap / Leak Repair",
+        "category": "plumbing",          # must match a ServiceCategory value
+        "base_price": 199.0,             # price per visit
+        "duration_minutes": 45,
+        "description": "Fix leaking taps, pipes and joints",
+        "active": True,
+    },
+    {
+        "id": 2,
+        "name": "Fan / Light Installation",
+        "category": "electrical",
+        "base_price": 249.0,
+        "duration_minutes": 45,
+        "description": "Install or replace ceiling fans, tube lights and bulbs",
+        "active": True,
+    },
+    {
+        "id": 3,
+        "name": "Switchboard & Wiring Repair",
+        "category": "electrical",
+        "base_price": 349.0,
+        "duration_minutes": 60,
+        "description": "Repair faulty switches, sockets, MCBs and wiring",
+        "active": True,
+    },
+    {
+        "id": 4,
+        "name": "Furniture Repair",
+        "category": "carpentry",
+        "base_price": 399.0,
+        "duration_minutes": 90,
+        "description": "Fix broken doors, hinges, drawers, beds and tables",
+        "active": True,
+    },
+    {
+        "id": 5,
+        "name": "Full Home Deep Cleaning",
+        "category": "cleaning",
+        "base_price": 1999.0,
+        "duration_minutes": 240,
+        "description": "Top-to-bottom cleaning of rooms, kitchen and bathrooms",
+        "active": True,
+    },
+    {
+        "id": 6,
+        "name": "Wall Painting (per room)",
+        "category": "painting",
+        "base_price": 2499.0,
+        "duration_minutes": 480,
+        "description": "Interior wall painting with putty and two coats of paint",
+        "active": True,
+    },
+    {
+        "id": 7,
+        "name": "AC Service & Repair",
+        "category": "appliance_repair",
+        "base_price": 499.0,
+        "duration_minutes": 60,
+        "description": "Gas check, filter cleaning and servicing of split/window ACs",
+        "active": True,
+    },
+    {
+        "id": 8,
+        "name": "Pest Control",
+        "category": "pest_control",
+        "base_price": 899.0,
+        "duration_minutes": 90,
+        "description": "Treatment for cockroaches, ants, termites and bed bugs",
+        "active": True,
+    },
+    {
+        "id": 9,
+        "name": "Water Tank Cleaning",
+        "category": "cleaning",
+        "base_price": 699.0,
+        "duration_minutes": 120,
+        "description": "Scrub and sanitise overhead and underground water tanks",
+        "active": True,
+    },
+    {
+        "id": 10,
+        "name": "Washing Machine Repair",
+        "category": "appliance_repair",
+        "base_price": 349.0,
+        "duration_minutes": 60,
+        "description": "Diagnose and repair top-load and front-load washing machines",
+        "active": True,
+    },
+]
+
+servicable_pincodes = {
+    "411001": {"pincode": "411001", "city": "Pune", "state": "Maharashtra", "zone": "Camp"},
+    "411002": {"pincode": "411002", "city": "Pune", "state": "Maharashtra", "zone": "Shivajinagar"},
+    "411003": {"pincode": "411003", "city": "Pune", "state": "Maharashtra", "zone": "Kharadi"},
+    "110042": {"pincode": "110042", "city": "New Delhi", "state": "Delhi", "zone": "Dwarka"}
+}
+
+from fastapi import APIRouter, HTTPException
+from typing import Optional
+from models.response import ServiceListResponse
+
+router = APIRouter(prefix="/services",tags=["Services"])
+
+@router.get("/",response_model=ServiceListResponse)
+def get_services(category: Optional[str] = None,active: Optional[bool] = None):
+    """
+    Get a list of services we provide.
+    Optional query parameters:
+    - category: filter by service category (e.g., "plumbing", "electrical")
+    - active: filter by active status (True or False)
+    """
+    filtered_services = [s for s in services_we_provide if s["active"] == active]  # Start with active services only
+    final_services = []
+    for service in filtered_services:
+        if service["category"] == category and service["active"] == active:
+            final_services.append(service)
+    if len(final_services) == 0:
+        raise HTTPException(status_code=404, detail="No services found for the given category and active status.")
+    return ServiceListResponse(
+        status="active",
+        count=len(final_services),
+        items=final_services
+    )
+
+@router.get("/{service_id}")
+def get_service_by_id(service_id: int):
+    """
+    Get details of a specific service by its ID.
+    """
+    for service in services_we_provide:
+        if service["id"] == service_id:
+            return service
+    raise HTTPException(status_code=404, detail="Service not found.")
+
+    
