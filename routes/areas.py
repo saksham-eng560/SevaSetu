@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from typing import Optional, List
 from app.exceptions import InvalidPincodeError, PincodeNotServiceableError, ServiceUnavailableError
-from app.data import servicable_pincodes,cities_we_service
+from app.data import servicable_pincodes,services_we_provide
 from pydantic import BaseModel
 from models.response import BulkList
 # exception handlers
@@ -44,18 +44,18 @@ def get_cities():
     """
     Get a list of cities we service.
     """
-    if not cities_we_service:
+    if not services_we_provide:
         raise ServiceUnavailableError(service_id=1)  # Example service_id
     finalist = []
-    for city in cities_we_service:
+    for city in services_we_provide:
         if city not in finalist:
             finalist.append(city)
     if len(finalist) == 0:
         raise ServiceUnavailableError(service_id=1)  # Example service_id
     return {"cities": finalist}
 
-@arearouter.post("/check-bulk")
-def bulker(pincodeList : Optional[bulkList] = None, ResponseModel = BulkList):
+@arearouter.post("/check-bulk",response_model=BulkList)
+def bulker(pincodeList : Optional[bulkList] = None):
     """
     Check a list of pincodes for serviceability.
     """    

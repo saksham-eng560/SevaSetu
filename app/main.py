@@ -4,22 +4,7 @@ from contextlib import asynccontextmanager
 from routes.services import router
 from routes.areas import arearouter
 from app.exceptions import InvalidPincodeError, PincodeNotServiceableError, ServiceUnavailableError
-# exception handlers
-def handle_invalid_pincode_error(request, exc: InvalidPincodeError):
-    return JSONResponse(
-        status_code=400,
-        content={"message": f"Invalid pincode: {exc.pincode}. Pincode must be 6 digits."},
-    )
-def handle_pincode_not_serviceable_error(request, exc: PincodeNotServiceableError):
-    return JSONResponse(
-        status_code=404,
-        content={"message": f"Pincode {exc.pincode} is not serviceable."},
-    )
-def handle_service_unavailable_error(request, exc: ServiceUnavailableError):
-    return JSONResponse(
-        status_code=409,
-        content={"message": f"Service with ID {exc.service_id} is currently unavailable."},
-    )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
