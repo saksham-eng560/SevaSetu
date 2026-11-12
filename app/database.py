@@ -1,7 +1,6 @@
 from sqlmodel import create_engine, SQLModel, Session
 from models.booking import Booking
 from models.customer import Customer
-from models.provider import Provider
 from models.review import Review
 
 DATABASE_URL = "sqlite:///./seva_setu.db"

@@ -27,18 +27,6 @@ class bulkList(BaseModel):
 
 arearouter = APIRouter(prefix="/areas",tags=["Areas"])
 
-@arearouter.get("/{pincode}")
-def get_area_by_pincode(pincode: str):
-    """
-    Get details of a specific area by its pincode.
-    """
-    from app.data import servicable_pincodes  
-    if len(pincode) != 6 or not pincode.isdigit():
-        raise InvalidPincodeError(pincode)
-    if pincode in servicable_pincodes:
-        return servicable_pincodes[pincode]
-    raise PincodeNotServiceableError(pincode)
-
 @arearouter.get("/cities")
 def get_cities():
     """
@@ -53,6 +41,18 @@ def get_cities():
     if len(finalist) == 0:
         raise ServiceUnavailableError(service_id=1)  # Example service_id
     return {"cities": finalist}
+
+@arearouter.get("/{pincode}")
+def get_area_by_pincode(pincode: str):
+    """
+    Get details of a specific area by its pincode.
+    """
+    from app.data import servicable_pincodes  
+    if len(pincode) != 6 or not pincode.isdigit():
+        raise InvalidPincodeError(pincode)
+    if pincode in servicable_pincodes:
+        return servicable_pincodes[pincode]
+    raise PincodeNotServiceableError(pincode)
 
 @arearouter.post("/check-bulk",response_model=BulkList)
 def bulker(pincodeList : Optional[bulkList] = None):

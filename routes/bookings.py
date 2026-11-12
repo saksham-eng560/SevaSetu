@@ -7,16 +7,13 @@ from models.booking import Booking
 
 bookings_router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
-@bookings_router.get("/}")
-def get_bookings_list(bookingList : List[Booking],Session = Depends(get_session)):
+@bookings_router.get("/")
+def get_bookings_list(Session = Depends(get_session)):
     """
-    Get a list of bookings.
+    Get a list of all bookings.
     """
-    finallist = []
-    for booking in bookingList:
-        response = Session.exec(select(Booking).where(Booking.id == booking.id)).first()
-        finallist.append(response.model_dump())
-    return {"bookings": finallist}
+    bookings = Session.exec(select(Booking)).all()
+    return {"bookings": [b.model_dump() for b in bookings]}
 
 @bookings_router.post("/")
 def create_booking(booking: Booking, Session = Depends(get_session)):

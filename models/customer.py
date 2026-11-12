@@ -1,9 +1,10 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional
+from typing import Optional, List
 import datetime
-from models.booking import Booking
-from typing import List
 from pydantic import field_validator
+
+# NOTE: `from models.booking import Booking` used to be here (top). It's now
+# at the bottom of the file to break the circular import.
 
 
 class Customer(SQLModel, table=True):
@@ -19,6 +20,24 @@ class Customer(SQLModel, table=True):
         return value
     pincode: str
     address: str
-    pincode: str
-    created_at: datetime = Field(default=None,datetime=datetime.datetime.utcnow())
-    bookings : List[Booking] = Relationship(back_populates="customer")
+    # (removed duplicate `pincode: str` declaration)
+    created_at: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+
+    # BUG FIX: was `List[Booking]` (unquoted), which needs the real class at
+    # class-creation time. Quoting makes it a forward reference.
+    bookings : List["Booking"] = Relationship(back_populates="customer")
+
+
+# ---------------------------------------------------------------------------
+# BOTTOM IMPORT + model_rebuild()  (the approach used)
+# ---------------------------------------------------------------------------
+# `Customer` is already defined here, so when booking.py does
+# `from models.customer import Customer` mid-import, it succeeds.
+# model_rebuild() then resolves the "Booking" forward reference.
+from models.booking import Booking  # noqa: E402,F401
+
+Customer.model_rebuild()
+
+
+# Alternative (not used): `if TYPE_CHECKING:` import at the top.
+# See the note at the bottom of models/booking.py.

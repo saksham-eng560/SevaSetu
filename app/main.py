@@ -3,6 +3,9 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from routes.services import router
 from routes.areas import arearouter
+from routes.bookings import bookings_router
+from routes.customers import router_customer
+from routes.reviews import router_review
 from app.exceptions import InvalidPincodeError, PincodeNotServiceableError, ServiceUnavailableError
 from app.database import create_table, get_session
 
@@ -23,6 +26,9 @@ app = FastAPI(
 
 app.include_router(router)
 app.include_router(arearouter)
+app.include_router(bookings_router)
+app.include_router(router_customer)
+app.include_router(router_review)
 
 @app.get("/",tags=["Root"])
 def read_root():

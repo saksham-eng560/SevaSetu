@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.database import get_session
 from typing import List
 from sqlmodel import select, Session
 from models.customer import Customer
+from models.booking import Booking
 
 router_customer = APIRouter(prefix="/customers", tags=["Customers"])
 
@@ -19,7 +20,13 @@ def create_customer(customer: Customer, Session: Session = Depends(get_session))
     """
     Create a new customer.
     """
+    customers = Session.exec(select(Customer)).first()
+    if customers and customers.email == customer.email:
+        raise HTTPException(status_code=400, detail="Customer with this email already exists.")
+    if customers and customers.phone_number == customer.phone_number:
+        raise HTTPException(status_code=422, detail="Customer with this phone number already exists.")
     new_customer = Customer.model_validate(customer)
+
     Session.add(new_customer)
     Session.commit()
     Session.refresh(new_customer)
@@ -58,3 +65,18 @@ def delete_customer(customer_id: int, Session: Session = Depends(get_session)):
     Session.delete(existing_customer)
     Session.commit()
     return {"message": "Customer deleted successfully."}
+
+@router_customer.get("/{id}/bookings")
+def get_customer_bookings(id: int, Session: Session = Depends(get_session)):
+    """
+    Get a list of bookings for a specific customer by their ID.
+    """
+    response = Session.exec(select(Booking).where(Booking.booking_id == id)).all()
+    customer = []
+    for r in response:
+        customer.append(r)
+
+    if len(customer) == 0:
+        raise HTTPException(status_code=404, detail="Customer not found.")
+   
+    return {"bookings": customer}
